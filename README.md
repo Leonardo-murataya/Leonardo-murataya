@@ -21,6 +21,8 @@
   
 - ⚡ Dato curioso: Estudio en la Universidad de Colima
 
+<br>
+
 <div align="left">
   <a href="https://www.instagram.com/leonardo_murataya/" target="_blank">
     <img src="https://img.shields.io/static/v1?message=Instagram&logo=instagram&label=&color=E4405F&logoColor=white&labelColor=&style=for-the-badge" height="35" alt="instagram logo"  />
@@ -34,7 +36,7 @@
 
 <br>
 
-## <picture></picture> **Mi conjunto de habilidades y redes**
+## <picture></picture> **Mi conjunto de habilidades**
 <img align="left" height="150" src="https://media.tenor.com/vZZEPrwfe6AAAAAi/happy-amine.gif"  />
 
 ###
