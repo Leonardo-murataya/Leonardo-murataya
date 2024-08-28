@@ -17,7 +17,7 @@
   
 - 📫 Cómo contactarme: ...
   
-- 😄 Pronombres: Leo
+- 😄 Apodo: Leo
   
 - ⚡ Dato curioso: Estudio en la Universidad de Colima
 
