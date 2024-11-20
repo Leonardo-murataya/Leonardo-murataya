@@ -63,14 +63,3 @@
 </div>
 <br>
 
-## <picture></picture> **Musica que escucho**
-
-<br>
-
-<div align="left">
-  <a href="https://open.spotify.com/user/3133dyqdr35r3b3rjfgxj4aeu7ji">
-    <img src="https://spotify-recently-played-readme.vercel.app/api?user=3133dyqdr35r3b3rjfgxj4aeu7ji&count=5" alt="Spotify recently played"  />
-  </a>
-</div>
-
-###
