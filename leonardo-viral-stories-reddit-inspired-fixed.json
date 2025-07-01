@@ -1,0 +1,395 @@
+{
+  "name": "Leonardo Viral Stories Generator REDDIT INSPIRED - FIXED",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "a1b2c3d4-e5f6-4321-8765-123456789abc",
+      "name": "📝 Form Trigger - Reddit Style",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2,
+      "position": [
+        400,
+        300
+      ],
+      "webhookId": "reddit-viral-form"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "concept_id",
+              "name": "concept_id",
+              "value": "={{ $json.concept_id }}",
+              "type": "string"
+            },
+            {
+              "id": "concept_title",
+              "name": "concept_title", 
+              "value": "={{ $json.concept_title }}",
+              "type": "string"
+            },
+            {
+              "id": "concept_description",
+              "name": "concept_description",
+              "value": "={{ $json.concept_description }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b2c3d4e5-f6g7-5432-9876-234567890bcd",
+      "name": "🎯 Process Form Data - Reddit Style",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [
+        620,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "messages": {
+          "messageValues": [
+            {
+              "role": "system",
+              "message": "You are a viral content creator specializing in Reddit-style storytelling. Create engaging, shareable content based on the given concept."
+            },
+            {
+              "role": "user", 
+              "message": "Create viral content for this concept:\nTitle: {{ $json.concept_title }}\nDescription: {{ $json.concept_description }}\n\nMake it Reddit-style with engaging storytelling, relatable scenarios, and viral potential."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c3d4e5f6-g7h8-6543-0987-345678901cde",
+      "name": "🤖 AI Content Generator - Reddit Style",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1.3,
+      "position": [
+        840,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": "={{ $json.google_doc_id }}",
+        "simple": false,
+        "updateFields": {
+          "title": "Reddit Viral Story - {{ $json.concept_title }}",
+          "body": "{{ $json.choices[0].message.content }}"
+        },
+        "options": {}
+      },
+      "id": "d4e5f6g7-h8i9-7654-1098-456789012def",
+      "name": "📄 Create Google Doc - Reddit Style",
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1060,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.exportLinks['application/pdf'] }}",
+        "options": {
+          "response": {
+            "responseFormat": "file"
+          }
+        }
+      },
+      "id": "e5f6g7h8-i9j0-8765-2109-567890123efg",
+      "name": "📄 Download PDF - Reddit Style",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1280,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "f6g7h8i9-j0k1-9876-3210-678901234fgh",
+      "name": "🔄 Wait for All PDFs - Reddit Style",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [
+        1500,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fileName": "={{ $json.concept_title.replace(/[^a-zA-Z0-9]/g, '_') }}_reddit_story.pdf",
+        "binaryPropertyName": "data"
+      },
+      "id": "g7h8i9j0-k1l2-0987-4321-789012345ghi",
+      "name": "📁 Convert to File - Reddit Style",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1720,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "h8i9j0k1-l2m3-1098-5432-890123456hij",
+      "name": "📊 Aggregate Reddit Style",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1940,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "code",
+        "jsCode": "// Merge Binary Files - Reddit Style - FIXED VERSION\n// This node properly handles binary data aggregation and ensures binary keys are correctly identified\n\nconst items = $input.all();\nconst binaryData = {};\nconst binaryKeys = [];\nconst fileNames = [];\n\n// Process each item and extract binary data\nfor (let i = 0; i < items.length; i++) {\n  const item = items[i];\n  \n  // Check if item has binary data in the 'data' property\n  if (item.binary && item.binary.data) {\n    const fileName = item.json.concept_title ? \n      `${item.json.concept_title.replace(/[^a-zA-Z0-9]/g, '_')}_reddit_story.pdf` : \n      `reddit_story_${i + 1}.pdf`;\n    \n    // Store binary data with a unique key\n    const binaryKey = `file_${i}`;\n    binaryData[binaryKey] = item.binary.data;\n    binaryKeys.push(binaryKey);\n    fileNames.push(fileName);\n    \n    console.log(`Processed binary file: ${fileName} with key: ${binaryKey}`);\n  } else {\n    console.warn(`Item ${i} does not have binary data in 'data' property:`, Object.keys(item.binary || {}));\n  }\n}\n\n// Validate we have binary data to process\nif (binaryKeys.length === 0) {\n  throw new Error('No binary data found in any items. Check that PDF download nodes are working correctly.');\n}\n\nconsole.log(`Successfully processed ${binaryKeys.length} binary files`);\nconsole.log('Binary keys:', binaryKeys);\nconsole.log('File names:', fileNames);\n\n// Return single item with all binary data and metadata\nreturn [{\n  json: {\n    total_files: binaryKeys.length,\n    binary_keys: binaryKeys,\n    file_names: fileNames,\n    timestamp: new Date().toISOString(),\n    workflow_status: 'binary_merge_successful'\n  },\n  binary: binaryData\n}];"
+      },
+      "id": "i9j0k1l2-m3n4-2109-6543-901234567ijk",
+      "name": "🔗 Merge Binary Files - Reddit Style",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "compress",
+        "format": "zip",
+        "binaryPropertyName": "data",
+        "outputFileName": "Reddit_Viral_Stories_{{ $now.format('YYYY-MM-DD_HH-mm') }}.zip",
+        "options": {
+          "binaryPropertyNames": "={{ $json.binary_keys.join(',') }}"
+        }
+      },
+      "id": "j0k1l2m3-n4o5-3210-7654-012345678jkl",
+      "name": "🗜️ Compress Files - Reddit Style",
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1,
+      "position": [
+        2380,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "fileId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "Reddit Viral Stories",
+          "cachedResultUrl": ""
+        },
+        "name": "Reddit_Viral_Stories_{{ $now.format('YYYY-MM-DD_HH-mm') }}.zip",
+        "binaryData": true,
+        "binaryPropertyName": "data",
+        "options": {
+          "parents": {
+            "parentId": {
+              "__rl": true,
+              "value": "",
+              "mode": "list",
+              "cachedResultName": "Reddit Stories Archive",
+              "cachedResultUrl": ""
+            }
+          }
+        }
+      },
+      "id": "k1l2m3n4-o5p6-4321-8765-123456789klm",
+      "name": "💾 Save ZIP to Drive - Reddit Style1",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2600,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "leonardo.murataya@example.com",
+        "subject": "🚀 Reddit Viral Stories Generated - {{ $now.format('YYYY-MM-DD HH:mm') }}",
+        "message": "Hi Leonardo,\\n\\nYour Reddit-style viral stories have been successfully generated and saved!\\n\\n📊 Summary:\\n- Total stories: {{ $('🔗 Merge Binary Files - Reddit Style').item.json.total_files }}\\n- Generated: {{ $now.format('YYYY-MM-DD HH:mm:ss') }}\\n- ZIP file: {{ $json.name }}\\n\\n✅ All files have been saved to Google Drive and are ready for review.\\n\\nBest regards,\\nLeonardo's Automation System",
+        "attachments": "data",
+        "options": {}
+      },
+      "id": "l2m3n4o5-p6q7-5432-9876-234567890lmn",
+      "name": "📧 Send Success Email - Reddit Style",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        2820,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "code",
+        "jsCode": "// Error Handler - Reddit Style\n// Provides detailed error information for debugging\n\nconst error = $json.error || 'Unknown error occurred';\nconst nodeName = $json.node || 'Unknown node';\nconst timestamp = new Date().toISOString();\n\nconsole.error(`Workflow Error at ${timestamp}:`);\nconsole.error(`Node: ${nodeName}`);\nconsole.error(`Error: ${error}`);\n\n// Send error notification\nreturn [{\n  json: {\n    error_type: 'workflow_failure',\n    error_message: error,\n    failed_node: nodeName,\n    timestamp: timestamp,\n    workflow_name: 'Leonardo Viral Stories Generator REDDIT INSPIRED',\n    troubleshooting: {\n      common_fixes: [\n        'Check binary data flow from PDF download',\n        'Verify Google Drive permissions',\n        'Confirm OpenAI API key is valid',\n        'Check form trigger configuration'\n      ]\n    }\n  }\n}];"
+      },
+      "id": "m3n4o5p6-q7r8-6543-0987-345678901mno",
+      "name": "❌ Error Handler - Reddit Style",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        500
+      ]
+    }
+  ],
+  "connections": {
+    "📝 Form Trigger - Reddit Style": {
+      "main": [
+        [
+          {
+            "node": "🎯 Process Form Data - Reddit Style",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🎯 Process Form Data - Reddit Style": {
+      "main": [
+        [
+          {
+            "node": "🤖 AI Content Generator - Reddit Style",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🤖 AI Content Generator - Reddit Style": {
+      "main": [
+        [
+          {
+            "node": "📄 Create Google Doc - Reddit Style",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📄 Create Google Doc - Reddit Style": {
+      "main": [
+        [
+          {
+            "node": "📄 Download PDF - Reddit Style",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📄 Download PDF - Reddit Style": {
+      "main": [
+        [
+          {
+            "node": "📁 Convert to File - Reddit Style",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📁 Convert to File - Reddit Style": {
+      "main": [
+        [
+          {
+            "node": "🔄 Wait for All PDFs - Reddit Style",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔄 Wait for All PDFs - Reddit Style": {
+      "main": [
+        [
+          {
+            "node": "📊 Aggregate Reddit Style",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Aggregate Reddit Style": {
+      "main": [
+        [
+          {
+            "node": "🔗 Merge Binary Files - Reddit Style",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔗 Merge Binary Files - Reddit Style": {
+      "main": [
+        [
+          {
+            "node": "🗜️ Compress Files - Reddit Style",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🗜️ Compress Files - Reddit Style": {
+      "main": [
+        [
+          {
+            "node": "💾 Save ZIP to Drive - Reddit Style1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "💾 Save ZIP to Drive - Reddit Style1": {
+      "main": [
+        [
+          {
+            "node": "📧 Send Success Email - Reddit Style",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-01-15T10:30:00.000Z",
+      "updatedAt": "2024-01-15T10:30:00.000Z",
+      "id": "reddit-viral-stories",
+      "name": "Reddit Viral Stories"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2024-01-15T10:30:00.000Z",
+  "versionId": "fixed-binary-flow-v1"
+}
